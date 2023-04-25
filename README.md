@@ -4,4 +4,4 @@
 
 Команда номер: 11 Участники: Лид - Булах Андрей - https://github.com/andrey-bulakh Исполнитель - Святослав Кравцов - https://github.com/npocbet Исполнитель - Артур Гайфулин - https://github.com/lazgut
 
-Ссылка на приватный репозиторий с командной работой: https://github.com/andrey-bulakh/ugc_sprint_2
+Ссылка на приватный репозиторий с командной работой: https://github.com/andrey-bulakh/notifications_sprint_1

@@ -1,0 +1,91 @@
+version: '3.5'
+services:
+  postgres:
+    image: postgres:14
+    env_file:
+      - ./postgresql/.env
+    expose:
+      - 5432
+    volumes:
+      - ./postgresql/data:/var/lib/postgresql/data
+
+  rabbitmq:
+    image: rabbitmq:3.11.13-management
+    hostname: rabbitmq
+    restart: always
+    env_file:
+      - ./rabbitmq/.env
+    expose:
+      - 15672
+      - 5672
+    volumes:
+      - ./rabbitmq/data:/var/lib/rabbitmq
+
+  admin_panel:
+    hostname: notifications_admin_panel
+    build: ./notifications/admin_panel
+    env_file:
+      - ./notifications/admin_panel/src/config/.env
+    volumes:
+      - ./static:/opt/app/static
+    expose:
+      - 8000
+    depends_on:
+      - postgres
+
+  api:
+    hostname: notifications_api
+    build: ./notifications/notifications_api
+    env_file:
+      - ./notifications/notifications_api/src/core/.env
+    volumes:
+      - ./notifications/notifications_api:/opt/app
+    depends_on:
+      - postgres
+      - rabbitmq
+    expose:
+      - 8000
+
+  scheduler:
+    hostname: scheduler
+    build: ./notifications/scheduler
+    env_file:
+      - ./notifications/scheduler/src/core/.env
+    volumes:
+      - ./notifications/scheduler:/opt/app
+    depends_on:
+      - postgres
+      - api
+
+  worker:
+    hostname: scheduler
+    build: ./notifications/worker
+    env_file:
+      - ./notifications/worker/src/core/.env
+    volumes:
+      - ./notifications/worker:/opt/app
+    depends_on:
+      - postgres
+      - rabbitmq
+      - mailhog
+
+  mailhog:
+    image: mailhog/mailhog
+    logging:
+      driver: 'none'  # disable saving logs
+    expose:
+      - 1025 # smtp server
+    ports:
+      - 8025:8025 # web ui
+
+  nginx:
+    image: nginx:latest
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/conf:/etc/nginx/conf.d:ro
+      - ./static:/static:ro
+    depends_on:
+      - admin_panel
+      - api
+    ports:
+      - 80:80

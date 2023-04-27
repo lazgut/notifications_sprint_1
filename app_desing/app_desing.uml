@@ -1,0 +1,37 @@
+@startuml
+skinparam componentStyle uml2
+
+package "Notifications Service" {
+component Nginx
+component [Admin Panel\n      Django] AS Django
+component [Notifications API\n\tFast API] AS FastAPI
+component Scheduler
+component [   Queues\nRabbitMQ] AS Queues
+component Workers
+
+database [      DB\nPostgres] AS DB
+}
+
+actor Staff
+component [Auth, UGC, Content \n и другие сервисы] AS Services
+component [Провайдеры рассылок \n (СМС, ТГ, пуш и т.п.)] AS Providers
+
+Staff -down-> Nginx: Администрирование нотификаций
+Services -> Nginx: Запрос на рассылку \n нотификаций
+
+Nginx -left-> Django: Запросы на администрирование
+
+Nginx -down-> FastAPI: Запросы на рассылку
+Scheduler -> FastAPI: Задание в очередь
+
+Django -down-> DB: Просмотр или \n администрирование \n нотификаций
+Scheduler -left-> DB: Запрос на периодические \n отложенные рассылки
+Workers -up-> DB: Запрос шаблонов
+
+FastAPI -down-> Queues: Задание в нужную \n очередь
+Workers -left-> Queues: Получение очереди\n по приоритету воркера
+
+Workers -down-> Services: Запрос на персонификацию \n рассылки
+Workers -down-> Providers: Сообщения для \n рассылки
+
+@enduml

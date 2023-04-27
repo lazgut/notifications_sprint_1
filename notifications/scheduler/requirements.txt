@@ -1,0 +1,7 @@
+backoff==2.2.1
+psycopg2-binary==2.9.6
+pydantic==1.10.7
+python-dotenv==1.0.0
+python-logstash==0.4.8
+requests==2.28.2
+SQLAlchemy==2.0.9
